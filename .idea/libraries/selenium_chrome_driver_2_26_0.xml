@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="selenium-chrome-driver-2.26.0">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../libs/jar_files/selenium-chrome-driver-2.26.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
