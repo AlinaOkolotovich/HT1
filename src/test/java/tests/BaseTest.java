@@ -7,6 +7,7 @@ import org.openqa.selenium.firefox.FirefoxProfile;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import pages.BasePage;
 
 import java.util.concurrent.TimeUnit;
 
@@ -20,13 +21,14 @@ import java.util.concurrent.TimeUnit;
     FirefoxProfile profile = new FirefoxProfile();
 
 
+
     @BeforeClass
     //Create a driver. All test and page classes use this driver.
     public void setup() throws Exception {
         System.setProperty("webdriver.gecko.driver", "/Users/okolotovich/Documents/driver/geckodriver");
         profile.setPreference("browser.startup.homepage", "about:blank");
         driver = new FirefoxDriver(profile);
-        driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+        driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
     }
 
     @AfterClass

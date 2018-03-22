@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
+import org.openqa.selenium.support.Color;
 
 
 import pages.BasePage;
@@ -30,7 +31,10 @@ public class JenkinsTest extends BaseTest {
     @Test
     public void loginToJenkins() throws IOException {
         openInitialPage();
+        checkButtonColor("//button[@id=\"yui-gen1-button\"]", "#4b758b");
         login();
+        checkRefreshLink();
+        checkRefreshLink();
         clickOnManageJenkinsLink();
         checkElementWithTagAndTextExists( "dt", "Manage Jenkins");
         checkElementWithTagAndTextExists( "dd","Create/delete/modify users that can log in to this Jenkins");
@@ -48,8 +52,19 @@ public class JenkinsTest extends BaseTest {
         checkInputIsEmpty("//input[@name = \"password2\"]");
         checkInputIsEmpty("//input[@name=\"fullname\"]");
         checkInputIsEmpty("//input[@name = \"email\"]");
+        checkButtonColor("//button[@id = \"yui-gen1-button\"]","#4b758b");
+        checkErrorMessageICreateUserWithEmptyFields();
         fillInTheForm("someuser", "somepassword", "Some Full Name","some@addr.dom");
-        checkElementWithByXpathExists("\"//table//tr/td/*[contains(text(),\"someuser\")]\"");
+        checkElementWithByXpathExists("//table//tr/td/*[contains(text(),\"someuser\")]");
+        clickOnElementWithXPath("//a[@href=\"user/someuser/delete\"]");
+        checkElementWithByXpathExists("//*[contains(text(),'Are you sure about deleting the user from Jenkins?')]");
+        checkButtonColor("//button[.=\"Yes\"]","#4b758b");
+        clickOnElementWithXPath("//button[.=\"Yes\"]");
+        checkElementWithByXpathNotExist("//table//tr/td/*[contains(text(),\"someuser\")]");
+        checkElementWithByXpathNotExist("//a[@href=\"user/someuser/delete\"]");
+
+
+
     }
 
     public void openInitialPage() {
@@ -58,8 +73,8 @@ public class JenkinsTest extends BaseTest {
 
     public void login() {
         LoginPage lp = new LoginPage(this.driver);
-        lp.login();
 
+        lp.login();
     }
 
     public void clickOnManageJenkinsLink() {
@@ -73,6 +88,10 @@ public class JenkinsTest extends BaseTest {
     public void checkElementWithByXpathExists(String xPath){
         Collection<WebElement> elements = driver.findElements(By.xpath(xPath));
         Assert.assertFalse(elements.isEmpty(), "FAILURE, no elements with XPath " + xPath + " found!");
+    }
+    public void checkElementWithByXpathNotExist(String xPath){
+        Collection<WebElement> elements = driver.findElements(By.xpath(xPath));
+        Assert.assertTrue(elements.isEmpty(), "FAILURE, no elements with XPath " + xPath + " found!");
     }
     public void checkElementWithTagAndTextExists(String tagName, String text){
         String xpathToCheck = "//*[contains(text(),'" + text + "')]";
@@ -117,6 +136,25 @@ public class JenkinsTest extends BaseTest {
         driver.findElement(By.xpath("//input[@name = \"fullname\"]")).sendKeys(fullName);
         driver.findElement(By.xpath("//input[@name = \"email\"]")).sendKeys(email);
         driver.findElement(By.xpath("//button[@id = \"yui-gen1-button\"]")).click();
+    }
+    public void checkButtonColor(String buttonXPath, String color){
+        Assert.assertTrue(Color.fromString(driver.findElement(By.xpath(buttonXPath)).getCssValue("background-color")).asHex().equalsIgnoreCase(color),
+                "FAILURE, button with XPath " + buttonXPath + " does not have color: " + color + " .");
+
+    }
+    public void checkErrorMessageICreateUserWithEmptyFields(){
+        fillInTheForm("","","","");
+        Assert.assertTrue(driver.findElement(By.xpath("//div[@class=\"error\"]")).getText().equalsIgnoreCase("\"\" is prohibited as a full name for security reasons."));
+    }
+    public void checkRefreshLink(){
+        String refreshLink = driver.findElement(By.xpath("//div[@class=\"smallfont\"]/a")).getText();
+        if(refreshLink.equalsIgnoreCase("ENABLE AUTO REFRESH")){
+            driver.findElement(By.xpath("//a[.='ENABLE AUTO REFRESH']")).click();
+            Assert.assertTrue(driver.findElement(By.xpath("//div[@class=\"smallfont\"]/a")).getText().equalsIgnoreCase("DISABLE AUTO REFRESH"));
+        } else {
+            driver.findElement(By.xpath("//a[.='DISABLE AUTO REFRESH']")).click();
+            Assert.assertTrue(driver.findElement(By.xpath("//div[@class=\"smallfont\"]/a")).getText().equalsIgnoreCase("ENABLE AUTO REFRESH"));
+        }
 
     }
 }
